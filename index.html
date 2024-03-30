@@ -65,6 +65,8 @@
             <h1>Confirm Demo Date</h1>
         </div>
         <div class="content">
+        <p>Email: <span id="emailDisplay"></span></p>
+
             <form id="demoForm">
                 <p>Please select a date for the demo:</p>
                 <input type="date" id="demoDate" name="demoDate">
@@ -75,20 +77,34 @@
         </div>
     </div>
         
-    <script>
-        document.getElementById("confirmButton").addEventListener("click", function() {
-            var demoDate = document.getElementById('demoDate').value;
-            if (demoDate) {
-                sendDataToScript(demoDate);
+    
+               <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var email = getUrlParameter('email'); // Get email from URL
+            if (email) {
+                document.getElementById('emailDisplay').textContent = email; // Display email on the page
             } else {
-                alert("Please select a demo date.");
+                document.getElementById('emailDisplay').textContent = 'Email not provided';
             }
+
+            document.getElementById("confirmButton").addEventListener("click", function() {
+                var demoDate = document.getElementById('demoDate').value;
+                if (!email) {
+                    alert("Email not provided");
+                    return;
+                }
+                if (demoDate) {
+                    sendDataToScript(demoDate, email);
+                } else {
+                    alert("Please select a demo date.");
+                }
+            });
         });
 
-        function sendDataToScript(demoDate) {
+        function sendDataToScript(demoDate, email) {
             var xhr = new XMLHttpRequest();
             var url = 'https://script.google.com/macros/s/AKfycbyTRc42Mpws1PkC3JTIDWaPww8BSIUIdzzXrwSkPp8dCdUu3BcfCV9vwJTdtMmXaHor/exec';
-            var params = 'demoDate=' + encodeURIComponent(demoDate);
+            var params = 'demoDate=' + encodeURIComponent(demoDate) + '&email=' + encodeURIComponent(email);
             xhr.open('POST', url, true);
             xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
             xhr.onload = function() {
@@ -100,6 +116,20 @@
             };
             xhr.send(params);
         }
+
+        // Function to extract query parameters from URL
+        function getEmailFromUrl() {
+    var queryString = window.location.search.substring(1);
+    var pairs = queryString.split('&');
+    for (var i = 0; i < pairs.length; i++) {
+        var pair = pairs[i].split('=');
+        if (pair[0] === 'email') {
+            return decodeURIComponent(pair[1] || '');
+        }
+    }
+    return ''; // Return empty string if 'email' parameter is not found
+}
+
     </script>
 </body>
 </html>
